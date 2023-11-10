@@ -9,7 +9,7 @@ module BFU(A_real,A_imag,B_real,B_imag,sel_w,X0_real, X0_imag, X1_real, X1_imag)
   input [1:0]sel_w;
   output signed [31:0] X0_real, X0_imag, X1_real, X1_imag;
   wire [31:0] sum1,diff1,B_sum_prod,B_sum_prod_n,B_diff_prod;
-  reg signed [31:0] B_real_0,B_imag_0,B_real_1,B_imag_1,Bxw_real,Bxw_imag;
+  reg signed [31:0] B_real_0,B_imag_0,B_real_1,B_imag_1,Bxw_real,Bxw_imag,B_real_n;
   wire cout1,cout2,cout3,cout4;
  
   always@(B_real,B_imag,sel_w)
@@ -42,7 +42,7 @@ module BFU(A_real,A_imag,B_real,B_imag,sel_w,X0_real, X0_imag, X1_real, X1_imag)
   always@(*)
     begin
      $display( "B_real_1 =%d, B_imag_1=%d ,B_real_0 =%d, B_imag_0=%d ", B_real_1,B_imag_1,B_real_0,B_imag_0);
-     $display( "sum1 =%d, diff1=%d ,0.707*sum =%d, 0.707*diff=%d ", sum1,diff1,B_sum_prod,B_diff_prod);
+      $display( "sum1 =%d, diff1=%d ,0.707*sum =%d, 0.707*diff=%d -b_real=%d", sum1,diff1,B_sum_prod,B_diff_prod,B_real_n);
    end
   
    always@(*)
@@ -70,10 +70,10 @@ module BFU(A_real,A_imag,B_real,B_imag,sel_w,X0_real, X0_imag, X1_real, X1_imag)
            end
        endcase
       end
-//  always@(*)
-//   begin
-//     $display( "Bxw_real =%d, Bxw_imag=%d ", Bxw_real,Bxw_imag);
-//   end
+  always@(*)
+   begin
+     $display( "Bxw_real =%d, Bxw_imag=%d ", Bxw_real,Bxw_imag);
+   end
   
   carry_look_ahead_32bit cla_bfu_5 (.a(A_real),.b(Bxw_real), .carry_in(1'b0), .sum(X0_real),.cout());//A'_real
   carry_look_ahead_32bit cla_bfu_6 (.a(A_imag),.b(Bxw_imag), .carry_in(1'b0), .sum(X0_imag),.cout());//A'_imag
@@ -87,3 +87,5 @@ module BFU(A_real,A_imag,B_real,B_imag,sel_w,X0_real, X0_imag, X1_real, X1_imag)
 //   end
   
 endmodule
+
+
