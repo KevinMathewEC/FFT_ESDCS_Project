@@ -2,14 +2,15 @@
 //FFT UNIT
 ///////////////////////////////////////////////////////////
 `timescale 1ns / 1ps
-module FFT(In_real,In_imag,Out_real,Out_imag,fft_ready);
+module FFT(In_real,In_imag,reset,clk,Out_real,Out_imag,fft_ready);
  `include "complex_mult.v"
  `include "16_bit_adder.v"
- `include "BFU.v
+ `include "BFU.v"
   input signed [15:0]In_real[7:0],In_imag[7:0];
+  input clk,reset;
   output fft_ready;
   output signed [15:0]Out_real[7:0],Out_imag[7:0];
-  reg signed    stage1_op_real[7:0],stage1_op_imag[7:0],stage2_ip_real[7:0],stage2_ip_imag[7:0],stage2_op_real[7:0],stage2_op_imag[7:0],stage3_ip_real[7:0],stage3_ip_imag[7:0];
+  reg signed  [15:0]  stage1_op_real[7:0],stage1_op_imag[7:0],stage2_ip_real[7:0],stage2_ip_imag[7:0],stage2_op_real[7:0],stage2_op_imag[7:0],stage3_ip_real[7:0],stage3_ip_imag[7:0];
   
   
   // initially compute stage 1. stage 1 consists only of basic addition and subtraction. For subtraction, carry input should be 1
@@ -51,6 +52,7 @@ module FFT(In_real,In_imag,Out_real,Out_imag,fft_ready);
 	  always@(posedge clk or negedge reset)
     begin
       if(reset)
+        begin
         stage2_ip_real[0]<=16'b0;
         stage2_ip_imag[0]<=16'b0;
         stage2_ip_real[1]<=16'b0;
@@ -67,6 +69,7 @@ module FFT(In_real,In_imag,Out_real,Out_imag,fft_ready);
       	stage2_ip_imag[6]<=16'b0;
       	stage2_ip_real[7]<=16'b0;
         stage2_ip_imag[8]<=16'b0;
+        end
        else
          begin
            stage2_ip_real[0]<=stage1_op_real[0];
@@ -125,6 +128,7 @@ module FFT(In_real,In_imag,Out_real,Out_imag,fft_ready);
   always@(posedge clk or negedge reset)
     begin
       if(reset)
+        begin
         stage3_ip_real[0]<=16'b0;
         stage3_ip_imag[0]<=16'b0;
         stage3_ip_real[1]<=16'b0;
@@ -141,6 +145,7 @@ module FFT(In_real,In_imag,Out_real,Out_imag,fft_ready);
       	stage3_ip_imag[6]<=16'b0;
       	stage3_ip_real[7]<=16'b0;
         stage3_ip_imag[8]<=16'b0;
+        end
        else
          begin
            stage3_ip_real[0]<=stage2_op_real[0];
@@ -188,4 +193,4 @@ module FFT(In_real,In_imag,Out_real,Out_imag,fft_ready);
            , .X0_imag(Out_imag[3]), .X1_real(Out_real[7]), .X1_imag(Out_imag[7])); // 11 is selected for sel_w as w^3 is the twiddle factor
   
   
-  endmodule
+endmodule
