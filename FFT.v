@@ -711,7 +711,7 @@ module FFT(In_real0,In_real1,In_real2,In_real3,In_real4,In_real5,In_real6,In_rea
 
 	  // stage 3 output 2 == X1 and output 6== X5
 
-  BFU bf3 (.A_real(stage3_ip_real[1]),.A_imag(stage3_ip_imag[1]),.B_real(stage3_ip_real[5]),.B_imag(stage3_ip_real[5]),.sel_w(2'b01),.X0_real(Out_real1)
+	BFU bf3 (.A_real(stage3_ip_real[1]),.A_imag(stage3_ip_imag[1]),.B_real(stage3_ip_real[5]),.B_imag(stage3_ip_imag[5]),.sel_w(2'b01),.X0_real(Out_real1)
 
            , .X0_imag(Out_imag1), .X1_real(Out_real5), .X1_imag(Out_imag5)); // 01 is selected for sel_w as w is the twiddle factor
 
