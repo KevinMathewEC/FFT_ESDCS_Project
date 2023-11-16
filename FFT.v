@@ -10,7 +10,7 @@
 
 module carry_look_ahead_16bit(a,b, carry_in, sum,cout);
 
-input signed[15:0] a,b;
+  input signed[15:0] a,b;
 
 input carry_in;
 
@@ -298,13 +298,13 @@ module BFU(A_real,A_imag,B_real,B_imag,sel_w,X0_real, X0_imag, X1_real, X1_imag)
 
       end
 
-  always@(*)
+//  always@(*)
 
-   begin
+//   begin
 
-     $display( "Bxw_real =%d, Bxw_imag=%d ", Bxw_real,Bxw_imag);
+//     $display( "Bxw_real =%d, Bxw_imag=%d ", Bxw_real,Bxw_imag);
 
- end
+// end
 
   
 
@@ -342,7 +342,7 @@ endmodule
 
 //`timescale 1ns / 1ps
 
-module FFT(In_real0,In_real1,In_real2,In_real3,In_real4,In_real5,In_real6,In_real7,In_imag0,In_imag1,In_imag2,In_imag3,In_imag4,In_imag5,In_imag6,In_imag7,reset,clk,Out_real0,Out_real1,Out_real2,Out_real3,Out_real4,Out_real5,Out_real6,Out_real7,Out_imag0,Out_imag1,Out_imag2,Out_imag3,Out_imag4,Out_imag5,Out_imag6,Out_imag7,fft_ready);
+module FFT(In_real0,In_real1,In_real2,In_real3,In_real4,In_real5,In_real6,In_real7,In_imag0,In_imag1,In_imag2,In_imag3,In_imag4,In_imag5,In_imag6,In_imag7,reset_n,clk,Out_real0,Out_real1,Out_real2,Out_real3,Out_real4,Out_real5,Out_real6,Out_real7,Out_imag0,Out_imag1,Out_imag2,Out_imag3,Out_imag4,Out_imag5,Out_imag6,Out_imag7,fft_ready);
 
 // `include "complex_mult.v"
 
@@ -364,7 +364,7 @@ module FFT(In_real0,In_real1,In_real2,In_real3,In_real4,In_real5,In_real6,In_rea
 
   reg signed [15:0]stage2_ip_real[7:0],stage2_ip_imag[7:0],stage3_ip_real[7:0],stage3_ip_imag[7:0];
 
-  
+  reg [1:0]i;//To be used to generate ready signal when output ready
 
   // initially compute stage 1. stage 1 consists only of basic addition and subtraction. For subtraction, carry input should be 1
 
@@ -483,7 +483,9 @@ module FFT(In_real0,In_real1,In_real2,In_real3,In_real4,In_real5,In_real6,In_rea
       	stage2_ip_real[7]<=16'b0;
 
       	stage2_ip_imag[7]<=16'b0;
-
+          
+        i <= 2'b0;
+        fft_ready <= 1'b0;
         end
 
        else
@@ -521,13 +523,17 @@ module FFT(In_real0,In_real1,In_real2,In_real3,In_real4,In_real5,In_real6,In_rea
            stage2_ip_real[7]<=stage1_op_real[7];
 
            stage2_ip_imag[7]<=stage1_op_imag[7];
-
            
-
+           if(i != 2'b11)
+             begin
+              i<=i+1'b1
+			  fft_ready<=1'b0;	
+             end
+           
+           if(i == 2'b11)
+               fft_ready<=1'b1;
          end
-
-          
-
+     
     end
 
 //  always@(*)
