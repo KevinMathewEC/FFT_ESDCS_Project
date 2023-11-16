@@ -368,10 +368,10 @@ module FFT(In_real0,In_real1,In_real2,In_real3,In_real4,In_real5,In_real6,In_rea
 
   // initially compute stage 1. stage 1 consists only of basic addition and subtraction. For subtraction, carry input should be 1
 
-  always@(*)
-    begin
-      $display("In0=%d,In1=%d,In2=%d,In3=%d",In_real0,In_real1,In_real2,In_real3);
-    end
+//  always@(*)
+//    begin
+      //$display("In0=%d,In1=%d,In2=%d,In3=%d",In_real0,In_real1,In_real2,In_real3);
+  //  end
 
 	 //stage 1 output 1
 
@@ -596,10 +596,10 @@ module FFT(In_real0,In_real1,In_real2,In_real3,In_real4,In_real5,In_real6,In_rea
            , .X0_imag(stage2_op_imag[5]), .X1_real(stage2_op_real[7]), .X1_imag(stage2_op_imag[7])); // 10 is selected for sel_w as w^2 is the twiddle factor
 
   
-    always@(*)
-    begin
-      $display("stage2_op_real0 =%d,stage2_op_imag0= %d ,stage2_op_real1= %d,stage2_op_imag1=%d,stage2_op_real2 =%d,stage2_op_imag2= %d ,stage2_op_real3= %d,stage2_op_imag3=%d, stage2_op_real4 =%d,stage2_op_imag4= %d ,stage2_op_real5= %d,stage2_op_imag5=%d,stage2_op_real6 =%d,stage2_op_imag6= %d ,stage2_op_real7= %d,stage2_op_imag7=%d,time =%0d", $signed(stage2_op_real[0]),$signed(stage2_op_imag[0]),$signed(stage2_op_real[1]),$signed(stage2_op_imag[1]),$signed(stage2_op_real[2]),$signed(stage2_op_imag[2]),$signed(stage2_op_real[3]),$signed(stage2_op_imag[3]),$signed(stage2_op_real[4]),$signed(stage2_op_imag[4]),$signed(stage2_op_real[5]),$signed(stage2_op_imag[5]),$signed(stage2_op_real[6]),$signed(stage2_op_imag[6]),$signed(stage2_op_real[7]),$signed(stage2_op_imag[7]),$time);
-    end	   
+ //   always@(*)
+  //  begin
+   //   $display("stage2_op_real0 =%d,stage2_op_imag0= %d ,stage2_op_real1= %d,stage2_op_imag1=%d,stage2_op_real2 =%d,stage2_op_imag2= %d ,stage2_op_real3= %d,stage2_op_imag3=%d, stage2_op_real4 =%d,stage2_op_imag4= %d ,stage2_op_real5= %d,stage2_op_imag5=%d,stage2_op_real6 =%d,stage2_op_imag6= %d ,stage2_op_real7= %d,stage2_op_imag7=%d,time =%0d", $signed(stage2_op_real[0]),$signed(stage2_op_imag[0]),$signed(stage2_op_real[1]),$signed(stage2_op_imag[1]),$signed(stage2_op_real[2]),$signed(stage2_op_imag[2]),$signed(stage2_op_real[3]),$signed(stage2_op_imag[3]),$signed(stage2_op_real[4]),$signed(stage2_op_imag[4]),$signed(stage2_op_real[5]),$signed(stage2_op_imag[5]),$signed(stage2_op_real[6]),$signed(stage2_op_imag[6]),$signed(stage2_op_real[7]),$signed(stage2_op_imag[7]),$time);
+ //   end	   
   always@(posedge clk or negedge reset)
 
     begin
@@ -688,10 +688,10 @@ module FFT(In_real0,In_real1,In_real2,In_real3,In_real4,In_real5,In_real6,In_rea
 
   	//stage 3 computation.
 
-	    always@(*)
-    begin
-      $display("stage3_ip_real0 =%d,stage3_ip_imag0= %d ,stage3_ip_real1= %d,stage3_ip_imag1=%d,stage3_ip_real2 =%d,stage3_ip_imag2= %d ,stage3_ip_real3= %d,stage3_ip_imag3=%d, stage3_ip_real4 =%d,stage3_ip_imag4= %d ,stage3_ip_real5= %d,stage3_ip_imag5=%d,stage3_ip_real6 =%d,stage3_ip_imag6= %d ,stage3_ip_real7= %d,stage3_ip_imag7=%d,time =%0d", $signed(stage3_ip_real[0]),$signed(stage3_ip_imag[0]),$signed(stage3_ip_real[1]),$signed(stage3_ip_imag[1]),$signed(stage3_ip_real[2]),$signed(stage3_ip_imag[2]),$signed(stage3_ip_real[3]),$signed(stage3_ip_imag[3]),$signed(stage3_ip_real[4]),$signed(stage3_ip_imag[4]),$signed(stage3_ip_real[5]),$signed(stage3_ip_imag[5]),$signed(stage3_ip_real[6]),$signed(stage3_ip_imag[6]),$signed(stage3_ip_real[7]),$signed(stage3_ip_imag[7]),$time);
-    end	
+//	    always@(*)
+//      begin
+//      $display("stage3_ip_real0 =%d,stage3_ip_imag0= %d ,stage3_ip_real1= %d,stage3_ip_imag1=%d,stage3_ip_real2 =%d,stage3_ip_imag2= %d ,stage3_ip_real3= %d,stage3_ip_imag3=%d, stage3_ip_real4 =%d,stage3_ip_imag4= %d ,stage3_ip_real5= %d,stage3_ip_imag5=%d,stage3_ip_real6 =%d,stage3_ip_imag6= %d ,stage3_ip_real7= %d,stage3_ip_imag7=%d,time =%0d", $signed(stage3_ip_real[0]),$signed(stage3_ip_imag[0]),$signed(stage3_ip_real[1]),$signed(stage3_ip_imag[1]),$signed(stage3_ip_real[2]),$signed(stage3_ip_imag[2]),$signed(stage3_ip_real[3]),$signed(stage3_ip_imag[3]),$signed(stage3_ip_real[4]),$signed(stage3_ip_imag[4]),$signed(stage3_ip_real[5]),$signed(stage3_ip_imag[5]),$signed(stage3_ip_real[6]),$signed(stage3_ip_imag[6]),$signed(stage3_ip_real[7]),$signed(stage3_ip_imag[7]),$time);
+//    end	
 
 		//stage 3 output 1 X0
 
@@ -711,7 +711,7 @@ module FFT(In_real0,In_real1,In_real2,In_real3,In_real4,In_real5,In_real6,In_rea
 
 	  // stage 3 output 2 == X1 and output 6== X5
 
-	BFU bf3 (.A_real(stage3_ip_real[1]),.A_imag(stage3_ip_imag[1]),.B_real(stage3_ip_real[5]),.B_imag(stage3_ip_imag[5]),.sel_w(2'b01),.X0_real(Out_real1)
+  BFU bf3 (.A_real(stage3_ip_real[1]),.A_imag(stage3_ip_imag[1]),.B_real(stage3_ip_real[5]),.B_imag(stage3_ip_imag[5]),.sel_w(2'b01),.X0_real(Out_real1)
 
            , .X0_imag(Out_imag1), .X1_real(Out_real5), .X1_imag(Out_imag5)); // 01 is selected for sel_w as w is the twiddle factor
 
@@ -729,14 +729,8 @@ module FFT(In_real0,In_real1,In_real2,In_real3,In_real4,In_real5,In_real6,In_rea
 
 	//stage 3 output 4==X3 and OUTPUT 8 ==X7
 
-	
+	  BFU bf5 (.A_real(stage3_ip_real[3]),.A_imag(stage3_ip_imag[3]),.B_real(stage3_ip_real[7]),.B_imag(stage3_ip_imag[7]),.sel_w(2'b11),.X0_real(Out_real3)
 
-  BFU bf5 (.A_real(stage3_ip_real[3]),.A_imag(stage3_ip_imag[3]),.B_real(stage3_ip_real[7]),.B_imag(stage3_ip_imag[7]),.sel_w(2'b11),.X0_real(Out_real3)
-
-           , .X0_imag(Out_imag3), .X1_real(Out_real7), .X1_imag(Out_imag7)); // 11 is selected for sel_w as w^3 is the twiddle factor
-
-  
-
-  
+          , .X0_imag(Out_imag3), .X1_real(Out_real7), .X1_imag(Out_imag7)); // 11 is selected for sel_w as w^3 is the twiddle factor
 
 endmodule
