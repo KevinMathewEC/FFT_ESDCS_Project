@@ -342,7 +342,7 @@ endmodule
 
 //`timescale 1ns / 1ps
 
-module FFT(In_real0,In_real1,In_real2,In_real3,In_real4,In_real5,In_real6,In_real7,In_imag0,In_imag1,In_imag2,In_imag3,In_imag4,In_imag5,In_imag6,In_imag7,reset_n,clk,Out_real0,Out_real1,Out_real2,Out_real3,Out_real4,Out_real5,Out_real6,Out_real7,Out_imag0,Out_imag1,Out_imag2,Out_imag3,Out_imag4,Out_imag5,Out_imag6,Out_imag7,fft_ready);
+module FFT(In_real0,In_real1,In_real2,In_real3,In_real4,In_real5,In_real6,In_real7,In_imag0,In_imag1,In_imag2,In_imag3,In_imag4,In_imag5,In_imag6,In_imag7,reset_n,clk,write,start_fft,Out_real0,Out_real1,Out_real2,Out_real3,Out_real4,Out_real5,Out_real6,Out_real7,Out_imag0,Out_imag1,Out_imag2,Out_imag3,Out_imag4,Out_imag5,Out_imag6,Out_imag7,fft_ready);
 
 // `include "complex_mult.v"
 
@@ -352,9 +352,9 @@ module FFT(In_real0,In_real1,In_real2,In_real3,In_real4,In_real5,In_real6,In_rea
 
   input signed [15:0]In_real0,In_real1,In_real2,In_real3,In_real4,In_real5,In_real6,In_real7,In_imag0,In_imag1,In_imag2,In_imag3,In_imag4,In_imag5,In_imag6,In_imag7;
 
-  input clk,reset;
+  input clk,reset_n,write,start_fft;
 
-  output fft_ready;
+  output reg fft_ready;
 
   output wire signed [15:0]Out_real0,Out_real1,Out_real2,Out_real3,Out_real4,Out_real5,Out_real6,Out_real7,Out_imag0,Out_imag1,Out_imag2,Out_imag3,Out_imag4,Out_imag5,Out_imag6,Out_imag7;
 
@@ -362,32 +362,120 @@ module FFT(In_real0,In_real1,In_real2,In_real3,In_real4,In_real5,In_real6,In_rea
 
   wire [15:0] stage1_op_real[7:0],stage1_op_imag[7:0],stage2_op_real[7:0],stage2_op_imag[7:0];
 
-  reg signed [15:0]stage2_ip_real[7:0],stage2_ip_imag[7:0],stage3_ip_real[7:0],stage3_ip_imag[7:0];
+  reg signed [15:0]stage1_ip_real[7:0],stage1_ip_imag[7:0],stage2_ip_real[7:0],stage2_ip_imag[7:0],stage3_ip_real[7:0],stage3_ip_imag[7:0],Input_real_reg[7:0],Input_imag_reg[7:0];
 
   reg [1:0]i;//To be used to generate ready signal when output ready
+  reg strt_cnt;
+  
+  always@(posedge clk or negedge reset_n)
+    begin
+      if(!reset_n)
+        begin
+        Input_real_reg[0]<=15'd0;
+      Input_real_reg[1]<=15'd0;
+      Input_real_reg[2]<=15'd0;
+      Input_real_reg[3]<=15'd0;
+      Input_real_reg[4]<=15'd0;
+      Input_real_reg[5]<=15'd0;
+      Input_real_reg[6]<=15'd0;
+      Input_real_reg[7]<=15'd0;
+      Input_imag_reg[0]<=15'd0;
+      Input_imag_reg[1]<=15'd0;
+      Input_imag_reg[2]<=15'd0;
+      Input_imag_reg[3]<=15'd0;
+      Input_imag_reg[4]<=15'd0;
+      Input_imag_reg[5]<=15'd0;
+      Input_imag_reg[6]<=15'd0;
+      Input_imag_reg[7]<=15'b0;
+      
+        end
+        else if (write)
+          begin             
+            Input_real_reg[0]<=In_real0;
+            Input_real_reg[1]<=In_real1;
+            Input_real_reg[2]<=In_real2;
+            Input_real_reg[3]<=In_real3;
+            Input_real_reg[4]<=In_real4;
+            Input_real_reg[5]<=In_real5;
+            Input_real_reg[6]<=In_real6;
+            Input_real_reg[7]<=In_real7;
+            Input_imag_reg[0]<=In_imag0;
+            Input_imag_reg[1]<=In_imag1;
+            Input_imag_reg[2]<=In_imag2;
+            Input_imag_reg[3]<=In_imag3;
+            Input_imag_reg[4]<=In_imag4;
+            Input_imag_reg[5]<=In_imag5;
+            Input_imag_reg[6]<=In_imag6;
+            Input_imag_reg[7]<=In_imag7;
+          end
+                  
+    end
+
+  
+    always@(posedge clk or negedge reset_n)
+    begin
+      if(!reset_n)
+        begin
+        stage1_ip_real[0]<=15'd0;
+      stage1_ip_real[1]<=15'd0;
+      stage1_ip_real[2]<=15'd0;
+      stage1_ip_real[3]<=15'd0;
+      stage1_ip_real[4]<=15'd0;
+      stage1_ip_real[5]<=15'd0;
+      stage1_ip_real[6]<=15'd0;
+      stage1_ip_real[7]<=15'd0;
+      stage1_ip_imag[0]<=15'd0;
+      stage1_ip_imag[1]<=15'd0;
+      stage1_ip_imag[2]<=15'd0;
+      stage1_ip_imag[3]<=15'd0;
+      stage1_ip_imag[4]<=15'd0;
+      stage1_ip_imag[5]<=15'd0;
+      stage1_ip_imag[6]<=15'd0;
+      stage1_ip_imag[7]<=15'b0;  
+      strt_cnt<=1'b0;
+        end
+      else if (start_fft)
+          begin             
+            stage1_ip_real[0]<=Input_real_reg[0];
+            stage1_ip_real[1]<=Input_real_reg[1];
+            stage1_ip_real[2]<=Input_real_reg[2];
+            stage1_ip_real[3]<=Input_real_reg[3];
+            stage1_ip_real[4]<=Input_real_reg[4];
+            stage1_ip_real[5]<=Input_real_reg[5];
+            stage1_ip_real[6]<=Input_real_reg[6];
+            stage1_ip_real[7]<=Input_real_reg[7];
+            stage1_ip_imag[0]<=Input_imag_reg[0];
+            stage1_ip_imag[1]<=Input_imag_reg[1];
+            stage1_ip_imag[2]<=Input_imag_reg[2];
+            stage1_ip_imag[3]<=Input_imag_reg[3];
+            stage1_ip_imag[4]<=Input_imag_reg[4];
+            stage1_ip_imag[5]<=Input_imag_reg[5];
+            stage1_ip_imag[6]<=Input_imag_reg[6];
+            stage1_ip_imag[7]<=Input_imag_reg[7];
+            strt_cnt<=1'b1;
+          end
+                  
+    end
 
   // initially compute stage 1. stage 1 consists only of basic addition and subtraction. For subtraction, carry input should be 1
 
-//  always@(*)
-//    begin
-      //$display("In0=%d,In1=%d,In2=%d,In3=%d",In_real0,In_real1,In_real2,In_real3);
-  //  end
+
 
 	 //stage 1 output 1
 
   
 
-  carry_look_ahead_16bit cla_fft_1 (.a(In_real0),.b(In_real4), .carry_in(1'b0), .sum(stage1_op_real[0]),.cout()); //Real (x0+x4)
+  carry_look_ahead_16bit cla_fft_1 (.a(stage1_ip_real[0]),.b(stage1_ip_real[4]), .carry_in(1'b0), .sum(stage1_op_real[0]),.cout()); //Real (x0+x4)
 
-  carry_look_ahead_16bit cla_fft_2 (.a(In_imag0),.b(In_imag4), .carry_in(1'b0), .sum(stage1_op_imag[0]),.cout()); //Imaginary (x0+x4)
+  carry_look_ahead_16bit cla_fft_2 (.a(stage1_ip_imag[0]),.b(stage1_ip_imag[4]), .carry_in(1'b0), .sum(stage1_op_imag[0]),.cout()); //Imaginary (x0+x4)
 
 	 
 
 	 //stage 1 output 2
 
-  carry_look_ahead_16bit cla_fft_3 (.a(In_real0),.b(In_real4), .carry_in(1'b1), .sum(stage1_op_real[1]),.cout());// real(x0-x4)
+  carry_look_ahead_16bit cla_fft_3 (.a(stage1_ip_real[0]),.b(stage1_ip_real[4]), .carry_in(1'b1), .sum(stage1_op_real[1]),.cout());// real(x0-x4)
 
-  carry_look_ahead_16bit cla_fft_4 (.a(In_imag0),.b(In_imag4), .carry_in(1'b1), .sum(stage1_op_imag[1]),.cout());// Imaginary (x0-x4)
+  carry_look_ahead_16bit cla_fft_4 (.a(stage1_ip_imag[0]),.b(stage1_ip_imag[4]), .carry_in(1'b1), .sum(stage1_op_imag[1]),.cout());// Imaginary (x0-x4)
 
 	 
 
@@ -395,60 +483,59 @@ module FFT(In_real0,In_real1,In_real2,In_real3,In_real4,In_real5,In_real6,In_rea
 
 	 //stage 1 output 3
 
-  carry_look_ahead_16bit cla_fft_5 (.a(In_real2),.b(In_real6), .carry_in(1'b0), .sum(stage1_op_real[2]),.cout()); //Real (x2+x6)
+  carry_look_ahead_16bit cla_fft_5 (.a(stage1_ip_real[2]),.b(stage1_ip_real[6]), .carry_in(1'b0), .sum(stage1_op_real[2]),.cout()); //Real (x2+x6)
 
-  carry_look_ahead_16bit cla_fft_6 (.a(In_imag2),.b(In_imag6), .carry_in(1'b0), .sum(stage1_op_imag[2]),.cout()); //Imaginary (x2+x6)
+  carry_look_ahead_16bit cla_fft_6 (.a(stage1_ip_imag[2]),.b(stage1_ip_imag[6]), .carry_in(1'b0), .sum(stage1_op_imag[2]),.cout()); //Imaginary (x2+x6)
 
 	 
 
 	 //stage 1 output 4
 
-  carry_look_ahead_16bit cla_fft_7 (.a(In_real2),.b(In_real6), .carry_in(1'b1), .sum(stage1_op_real[3]),.cout());// real(x2-x6)
+  carry_look_ahead_16bit cla_fft_7 (.a(stage1_ip_real[2]),.b(stage1_ip_real[6]), .carry_in(1'b1), .sum(stage1_op_real[3]),.cout());// real(x2-x6)
 
-  carry_look_ahead_16bit cla_fft_8 (.a(In_imag2),.b(In_imag6), .carry_in(1'b1), .sum(stage1_op_imag[3]),.cout());// Imaginary (x2-x6)
+  carry_look_ahead_16bit cla_fft_8 (.a(stage1_ip_imag[2]),.b(stage1_ip_imag[6]), .carry_in(1'b1), .sum(stage1_op_imag[3]),.cout());// Imaginary (x2-x6)
 
 	 
 
 	 //stage 1 output 5
 
-  carry_look_ahead_16bit cla_fft_9 (.a(In_real1),.b(In_real5), .carry_in(1'b0), .sum(stage1_op_real[4]),.cout()); //Real (x1+x5)
+  carry_look_ahead_16bit cla_fft_9 (.a(stage1_ip_real[1]),.b(stage1_ip_real[5]), .carry_in(1'b0), .sum(stage1_op_real[4]),.cout()); //Real (x1+x5)
 
-  carry_look_ahead_16bit cla_fft_10 (.a(In_imag1),.b(In_imag5), .carry_in(1'b0), .sum(stage1_op_imag[4]),.cout()); //Imaginary (x1+x5)
+  carry_look_ahead_16bit cla_fft_10 (.a(stage1_ip_imag[1]),.b(stage1_ip_imag[5]), .carry_in(1'b0), .sum(stage1_op_imag[4]),.cout()); //Imaginary (x1+x5)
 
 	 
 
 	 //stage 1 output 6
 
-  carry_look_ahead_16bit cla_fft_11 (.a(In_real1),.b(In_real5), .carry_in(1'b1), .sum(stage1_op_real[5]),.cout());// real(x1-x5)
+  carry_look_ahead_16bit cla_fft_11 (.a(stage1_ip_real[1]),.b(stage1_ip_real[5]), .carry_in(1'b1), .sum(stage1_op_real[5]),.cout());// real(x1-x5)
 
-  carry_look_ahead_16bit cla_fft_12 (.a(In_imag1),.b(In_imag5), .carry_in(1'b1), .sum(stage1_op_imag[5]),.cout());// Imaginary (x1-x5)
+  carry_look_ahead_16bit cla_fft_12 (.a(stage1_ip_imag[1]),.b(stage1_ip_imag[5]), .carry_in(1'b1), .sum(stage1_op_imag[5]),.cout());// Imaginary (x1-x5)
 
 	  
 
 	 //stage 1 output 7
 
-  carry_look_ahead_16bit cla_fft_13 (.a(In_real3),.b(In_real7), .carry_in(1'b0), .sum(stage1_op_real[6]),.cout()); //Real (x3+x7)
+  carry_look_ahead_16bit cla_fft_13 (.a(stage1_ip_real[3]),.b(stage1_ip_real[7]), .carry_in(1'b0), .sum(stage1_op_real[6]),.cout()); //Real (x3+x7)
 
-  carry_look_ahead_16bit cla_fft_14 (.a(In_imag3),.b(In_imag7), .carry_in(1'b0), .sum(stage1_op_imag[6]),.cout()); //Imaginary (x3+x7)
+  carry_look_ahead_16bit cla_fft_14 (.a(stage1_ip_imag[3]),.b(stage1_ip_imag[7]), .carry_in(1'b0), .sum(stage1_op_imag[6]),.cout()); //Imaginary (x3+x7)
 
 	 
 
 	 //stage 1 output 8
 
-  carry_look_ahead_16bit cla_fft_15 (.a(In_real3),.b(In_real7), .carry_in(1'b1), .sum(stage1_op_real[7]),.cout());// real(x3-x7)
+  carry_look_ahead_16bit cla_fft_15 (.a(stage1_ip_real[3]),.b(stage1_ip_real[7]), .carry_in(1'b1), .sum(stage1_op_real[7]),.cout());// real(x3-x7)
 
-  carry_look_ahead_16bit cla_fft_16 (.a(In_imag3),.b(In_imag7), .carry_in(1'b1), .sum(stage1_op_imag[7]),.cout());// Imaginary (x3-x7) 
+  carry_look_ahead_16bit cla_fft_16 (.a(stage1_ip_imag[3]),.b(stage1_ip_imag[7]), .carry_in(1'b1), .sum(stage1_op_imag[7]),.cout());// Imaginary (x3-x7) 
 
 //  always@(*)
 //    begin
-//      $display("stage1_op_real0 =%d,stage1_op_imag0= %d ,stage1_op_real1= %d,stage1_op_imag1=%d,stage1_op_real2 =%d,stage1_op_imag2= %d ,stage1_op_real3= %d,stage1_op_imag3=%d, stage1_op_real4 =%d,stage1_op_imag4= %d ,stage1_op_real5= %d,stage1_op_imag5=%d,stage1_op_real6 =%d,stage1_op_imag6= %d ,stage1_op_real7= %d,stage1_op_imag7=%d,time =%d", $signed(stage1_op_real[0]),$signed(stage1_op_imag[0]),$signed(stage1_op_real[1]),$signed(stage1_op_imag[1]),$signed(stage1_op_real[2]),$signed(stage1_op_imag[2]),$signed(stage1_op_real[3]),$signed(stage1_op_imag[3]),$signed(stage1_op_real[4]),$signed(stage1_op_imag[4]),$signed(stage1_op_real[5]),$signed(stage1_op_imag[5]),$signed(stage1_op_real[6]),$signed(stage1_op_imag[6]),$signed(stage1_op_real[7]),$signed(stage1_op_imag[7]),$time);
-//    end
 
-	  always@(posedge clk or negedge reset)
+
+  always@(posedge clk or negedge reset_n)
 
     begin
 
-      if(reset)
+      if(!reset_n)
 
         begin
 
@@ -524,9 +611,9 @@ module FFT(In_real0,In_real1,In_real2,In_real3,In_real4,In_real5,In_real6,In_rea
 
            stage2_ip_imag[7]<=stage1_op_imag[7];
            
-           if(i != 2'b11)
+           if((i != 2'b11) & strt_cnt)
              begin
-              i<=i+1'b1
+              i<=i+1'b1;
 			  fft_ready<=1'b0;	
              end
            
@@ -536,10 +623,6 @@ module FFT(In_real0,In_real1,In_real2,In_real3,In_real4,In_real5,In_real6,In_rea
      
     end
 
-//  always@(*)
-//    begin
-//      $display("stage2_ip_real0 =%d,stage2_ip_imag0= %d ,stage2_ip_real1= %d,stage2_ip_imag1=%d,stage2_ip_real2 =%d,stage2_ip_imag2= %d ,stage2_ip_real3= %d,stage2_ip_imag3=%d, stage2_ip_real4 =%d,stage2_ip_imag4= %d ,stage2_ip_real5= %d,stage2_ip_imag5=%d,stage2_ip_real6 =%d,stage2_ip_imag6= %d ,stage2_ip_real7= %d,stage2_ip_imag7=%d,time =%0d", $signed(stage2_ip_real[0]),$signed(stage2_ip_imag[0]),$signed(stage2_ip_real[1]),$signed(stage2_ip_imag[1]),$signed(stage2_ip_real[2]),$signed(stage2_ip_imag[2]),$signed(stage2_ip_real[3]),$signed(stage2_ip_imag[3]),$signed(stage2_ip_real[4]),$signed(stage2_ip_imag[4]),$signed(stage2_ip_real[5]),$signed(stage2_ip_imag[5]),$signed(stage2_ip_real[6]),$signed(stage2_ip_imag[6]),$signed(stage2_ip_real[7]),$signed(stage2_ip_imag[7]),$time);
-//    end	
 
 	//stage 2 computation.
 
@@ -602,15 +685,12 @@ module FFT(In_real0,In_real1,In_real2,In_real3,In_real4,In_real5,In_real6,In_rea
            , .X0_imag(stage2_op_imag[5]), .X1_real(stage2_op_real[7]), .X1_imag(stage2_op_imag[7])); // 10 is selected for sel_w as w^2 is the twiddle factor
 
   
- //   always@(*)
-  //  begin
-   //   $display("stage2_op_real0 =%d,stage2_op_imag0= %d ,stage2_op_real1= %d,stage2_op_imag1=%d,stage2_op_real2 =%d,stage2_op_imag2= %d ,stage2_op_real3= %d,stage2_op_imag3=%d, stage2_op_real4 =%d,stage2_op_imag4= %d ,stage2_op_real5= %d,stage2_op_imag5=%d,stage2_op_real6 =%d,stage2_op_imag6= %d ,stage2_op_real7= %d,stage2_op_imag7=%d,time =%0d", $signed(stage2_op_real[0]),$signed(stage2_op_imag[0]),$signed(stage2_op_real[1]),$signed(stage2_op_imag[1]),$signed(stage2_op_real[2]),$signed(stage2_op_imag[2]),$signed(stage2_op_real[3]),$signed(stage2_op_imag[3]),$signed(stage2_op_real[4]),$signed(stage2_op_imag[4]),$signed(stage2_op_real[5]),$signed(stage2_op_imag[5]),$signed(stage2_op_real[6]),$signed(stage2_op_imag[6]),$signed(stage2_op_real[7]),$signed(stage2_op_imag[7]),$time);
- //   end	   
-  always@(posedge clk or negedge reset)
+   
+  always@(posedge clk or negedge reset_n)
 
     begin
 
-      if(reset)
+      if(!reset_n)
 
         begin
 
@@ -694,10 +774,6 @@ module FFT(In_real0,In_real1,In_real2,In_real3,In_real4,In_real5,In_real6,In_rea
 
   	//stage 3 computation.
 
-//	    always@(*)
-//      begin
-//      $display("stage3_ip_real0 =%d,stage3_ip_imag0= %d ,stage3_ip_real1= %d,stage3_ip_imag1=%d,stage3_ip_real2 =%d,stage3_ip_imag2= %d ,stage3_ip_real3= %d,stage3_ip_imag3=%d, stage3_ip_real4 =%d,stage3_ip_imag4= %d ,stage3_ip_real5= %d,stage3_ip_imag5=%d,stage3_ip_real6 =%d,stage3_ip_imag6= %d ,stage3_ip_real7= %d,stage3_ip_imag7=%d,time =%0d", $signed(stage3_ip_real[0]),$signed(stage3_ip_imag[0]),$signed(stage3_ip_real[1]),$signed(stage3_ip_imag[1]),$signed(stage3_ip_real[2]),$signed(stage3_ip_imag[2]),$signed(stage3_ip_real[3]),$signed(stage3_ip_imag[3]),$signed(stage3_ip_real[4]),$signed(stage3_ip_imag[4]),$signed(stage3_ip_real[5]),$signed(stage3_ip_imag[5]),$signed(stage3_ip_real[6]),$signed(stage3_ip_imag[6]),$signed(stage3_ip_real[7]),$signed(stage3_ip_imag[7]),$time);
-//    end	
 
 		//stage 3 output 1 X0
 
