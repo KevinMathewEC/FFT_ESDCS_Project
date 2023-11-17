@@ -1,12 +1,12 @@
 `timescale 1ns/1ps
 module FFT_tb;
-  parameter CLOCK_PERIOD = 100; // 10 MHz clock
-  reg [15:0] In_real[7:0],In_imag[7:0];
-  reg clk,reset;
-  wire [15:0] Out_real[7:0],Out_imag[7:0];
+  parameter CLOCK_PERIOD = 10; // 10 MHz clock
+  reg [15:0] In_real0,In_real1,In_real2,In_real3,In_real4,In_real5,In_real6,In_real7,In_imag0,In_imag1,In_imag2,In_imag3,In_imag4,In_imag5,In_imag6,In_imag7;
+  reg clk,reset_n,write,start_fft;
+  wire [15:0] Out_real0,Out_real1,Out_real2,Out_real3,Out_real4,Out_real5,Out_real6,Out_real7,Out_imag0,Out_imag1,Out_imag2,Out_imag3,Out_imag4,Out_imag5,Out_imag6,Out_imag7;
 wire fft_ready;
 
-  FFT ff(.In_real(In_real),.In_imag(In_imag),.reset(reset),.clk(clk),.Out_real(Out_real),.Out_imag(Out_imag),.fft_ready(fft_ready));
+  FFT ff(.In_real0(In_real0),.In_real1(In_real1),.In_real2(In_real2),.In_real3(In_real3),.In_real4(In_real4),.In_real5(In_real5),.In_real6(In_real6),.In_real7(In_real7),.In_imag0(In_imag0),.In_imag1(In_imag1),.In_imag2(In_imag2),.In_imag3(In_imag3),.In_imag4(In_imag4),.In_imag5(In_imag5),.In_imag6(In_imag6),.In_imag7(In_imag7),.reset_n(reset_n),.clk(clk),.write(write),.start_fft(start_fft),.Out_real0(Out_real0),.Out_real1(Out_real1),.Out_real2(Out_real2),.Out_real3(Out_real3),.Out_real4(Out_real4),.Out_real5(Out_real5),.Out_real6(Out_real6),.Out_real7(Out_real7),.Out_imag0(Out_imag0),.Out_imag1(Out_imag1),.Out_imag2(Out_imag2),.Out_imag3(Out_imag3),.Out_imag4(Out_imag4),.Out_imag5(Out_imag5),.Out_imag6(Out_imag6),.Out_imag7(Out_imag7),.fft_ready(fft_ready));
 initial begin
 $dumpfile("dump.vcd"); 
 $dumpvars;
@@ -14,24 +14,37 @@ end
 
 initial begin
   clk=0;
-  reset=0;
-  In_real[0]=1; 
-  In_real[1]=2; 
-  In_real[2]=3; 
-  In_real[3]=4; 
-  In_real[4]=4; 
-  In_real[5]=3; 
-  In_real[6]=2; 
-  In_real[7]=1;
+    start_fft=0;
+  In_real0=50; 
+  In_real1=50; 
+  In_real2=50; 
+  In_real3=50; 
+  In_real4=00; 
+  In_real5=00; 
+  In_real6=00; 
+  In_real7=00;
   
-  In_imag[0]=0;
-  In_imag[1]=0;
-  In_imag[2]=0;
-  In_imag[3]=0;
-  In_imag[4]=0;
-  In_imag[5]=0;
-  In_imag[6]=0;
-  In_imag[7]=0;
+  In_imag0=0;
+  In_imag1=0;
+  In_imag2=0;
+  In_imag3=0;
+  In_imag4=0;
+  In_imag5=0;
+  In_imag6=0;
+  In_imag7=0;
+  
+  write=0;
+  start_fft=0;
+  reset_n=0;
+  #12 reset_n=1;
+  write =1;
+  #4 write=0;
+  start_fft=1;
+
+  
+  #15 start_fft =0;
+  
+  #80 $finish(); 
   
  // #10 a=16'd0; b=16'd0; carry_in=1'd1;
 // #10 a=-16'd15; b=16'd1; carry_in=1'd1;
@@ -39,10 +52,11 @@ initial begin
  // #10 a=16'd999; b=16'd7; carry_in=1'd1;
 end
   always begin
-		#(CLOCK_PERIOD/2) clk = clk;
+    #(CLOCK_PERIOD/2) clk = ~clk;
 	end
+    always@(*)
+    begin
+      $display("Out_real0 =%d,Out_imag0= %d ,Out_real1= %d,Out_imag1=%d,Out_real2 =%d,Out_imag2= %d ,Out_real3= %d,Out_imag3=%d, Out_real4 =%d,Out_imag4= %d ,Out_real5= %d,Out_imag5=%d,Out_real6 =%d,Out_imag6= %d ,Out_real7= %d,Out_imag7=%d,time =%0d", $signed(Out_real0),$signed(Out_imag0),$signed(Out_real1),$signed(Out_imag1),$signed(Out_real2),$signed(Out_imag2),$signed(Out_real3),$signed(Out_imag3),$signed(Out_real4),$signed(Out_imag4),$signed(Out_real5),$signed(Out_imag5),$signed(Out_real6),$signed(Out_imag6),$signed(Out_real7),$signed(Out_imag7),$time);
+    end
 
-  initial begin
-    $monitor( "Out_real[0]=%d, Out_real[1]=%d, Out_real[2]= %d, Out_real[3]=%d, Out_real[4]=%d, Out_real[5]=%d, Out_real[6]=%d, Out_real[7]=%d, Out_imag[0]=%d, Out_imag[1]=%d, Out_imag[2]= %d, Out_imag[3]=%d, Out_imag[4]=%d, Out_imag[5]=%d, Out_imag[6]=%d, Out_imag[7]=%d", Out_real[0],Out_real[1],Out_real[2],Out_real[3],Out_real[4],Out_real[5],Out_real[6],Out_real[7],Out_imag[0],Out_imag[1],Out_imag[2],Out_imag[3],Out_imag[4],Out_imag[5],Out_imag[6],Out_imag[7]);
-  end
 endmodule
