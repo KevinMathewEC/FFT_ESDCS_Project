@@ -38,9 +38,30 @@ initial begin
   in7_imag=0;
   write =1;
   #4 write=0;
-  start=1;
+  #6 start=1;
+    in0_real=100; 
+  in1_real=200; 
+  in2_real=300; 
+  in3_real=400; 
+  in4_real=400; 
+  in5_real=300; 
+  in6_real=200; 
+  in7_real=100;
   
-  #15 start =0;
+  in0_imag=0;
+  in1_imag=0;
+  in2_imag=0;
+  in3_imag=0;
+  in4_imag=0;
+  in5_imag=0;
+  in6_imag=0;
+  in7_imag=0;  
+     write=1;  
+  #5 start =0;
+  write=0;
+  
+  #6 start=1;
+  #5 start=0;
   
   #80 $finish(); 
   
@@ -52,9 +73,12 @@ end
   always begin
     #(CLOCK_PERIOD/2) CLK = ~CLK;
 	end
-    always@(*)
+  always@(*)
     begin
+      if(ready)
+        begin
       $display("out0_real =%d,out0_imag= %d ,out1_real= %d,out1_imag=%d,out2_real =%d,out2_imag= %d ,out3_real= %d,out3_imag=%d, out4_real =%d,out4_imag= %d ,out5_real= %d,out5_imag=%d,out6_real =%d,out6_imag= %d ,out7_real= %d,out7_imag=%d,time =%0d", $signed(out0_real),$signed(out0_imag),$signed(out1_real),$signed(out1_imag),$signed(out2_real),$signed(out2_imag),$signed(out3_real),$signed(out3_imag),$signed(out4_real),$signed(out4_imag),$signed(out5_real),$signed(out5_imag),$signed(out6_real),$signed(out6_imag),$signed(out7_real),$signed(out7_imag),$time);
+    end
     end
 
 endmodule
