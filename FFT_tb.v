@@ -13,7 +13,7 @@ $dumpvars;
 end
 
 initial begin
-  clk=0;
+  CLK=0;
   
   write=0;
   start=0;
@@ -50,7 +50,7 @@ initial begin
  // #10 a=16'd999; b=16'd7; carry_in=1'd1;
 end
   always begin
-    #(CLOCK_PERIOD/2) clk = ~clk;
+    #(CLOCK_PERIOD/2) CLK = ~CLK;
 	end
     always@(*)
     begin
