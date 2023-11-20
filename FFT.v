@@ -356,16 +356,16 @@ module FFT(In_real0,In_real1,In_real2,In_real3,In_real4,In_real5,In_real6,In_rea
 
   output reg fft_ready;
 
-  output wire signed [15:0]Out_real0,Out_real1,Out_real2,Out_real3,Out_real4,Out_real5,Out_real6,Out_real7,Out_imag0,Out_imag1,Out_imag2,Out_imag3,Out_imag4,Out_imag5,Out_imag6,Out_imag7;
+  output reg signed [15:0]Out_real0,Out_real1,Out_real2,Out_real3,Out_real4,Out_real5,Out_real6,Out_real7,Out_imag0,Out_imag1,Out_imag2,Out_imag3,Out_imag4,Out_imag5,Out_imag6,Out_imag7;
 
   //reg signed  [15:0]  stage1_op_real[7:0],stage1_op_imag[7:0],stage2_ip_real[7:0],stage2_ip_imag[7:0],stage2_op_real[7:0],stage2_op_imag[7:0],stage3_ip_real[7:0],stage3_ip_imag[7:0];
 
-  wire [15:0] stage1_op_real[7:0],stage1_op_imag[7:0],stage2_op_real[7:0],stage2_op_imag[7:0];
+  wire [15:0] stage1_op_real[7:0],stage1_op_imag[7:0],stage2_op_real[7:0],stage2_op_imag[7:0],stage3_op_real[7:0],stage3_op_imag[7:0];
 
   reg signed [15:0]stage1_ip_real[7:0],stage1_ip_imag[7:0],stage2_ip_real[7:0],stage2_ip_imag[7:0],stage3_ip_real[7:0],stage3_ip_imag[7:0],Input_real_reg[7:0],Input_imag_reg[7:0];
 
   reg [1:0]i;//To be used to generate ready signal when output ready
-  reg strt_cnt;
+  reg strt_s1,strt_s2,strt_s3;
   
   always@(posedge clk or negedge reset_n)
     begin
@@ -387,7 +387,8 @@ module FFT(In_real0,In_real1,In_real2,In_real3,In_real4,In_real5,In_real6,In_rea
       Input_imag_reg[5]<=15'd0;
       Input_imag_reg[6]<=15'd0;
       Input_imag_reg[7]<=15'b0;
-      
+      strt_s1<=1'b0;
+      fft_ready<=1'b0; 
         end
         else if (write)
           begin             
@@ -410,10 +411,7 @@ module FFT(In_real0,In_real1,In_real2,In_real3,In_real4,In_real5,In_real6,In_rea
           end
                   
     end
-      always@(*)
-    begin
-      $display("In_real0 =%d,In_imag0= %d ,In_real1= %d,In_imag1=%d,In_real2 =%d,In_imag2= %d ,IN_real3= %d,In_imag3=%d, In_real4 =%d,In_imag4= %d ,In_real5= %d,In_imag5=%d,In_real6 =%d,In_imag6= %d ,In_real7= %d,In_imag7=%d,time =%0d", $signed(Input_real_reg[0]),$signed(Input_imag_reg[0]),$signed(Input_real_reg[1]),$signed(Input_imag_reg[1]),$signed(Out_real2),$signed(Out_imag2),$signed(Out_real3),$signed(Out_imag3),$signed(Out_real4),$signed(Out_imag4),$signed(Out_real5),$signed(Out_imag5),$signed(Out_real6),$signed(Out_imag6),$signed(Out_real7),$signed(Out_imag7),$time);
-    end
+
   
     always@(posedge clk or negedge reset_n)
     begin
@@ -435,7 +433,7 @@ module FFT(In_real0,In_real1,In_real2,In_real3,In_real4,In_real5,In_real6,In_rea
       stage1_ip_imag[5]<=15'd0;
       stage1_ip_imag[6]<=15'd0;
       stage1_ip_imag[7]<=15'b0;  
-      strt_cnt<=1'b0;
+      
         end
       else if (start_fft)
           begin             
@@ -455,8 +453,10 @@ module FFT(In_real0,In_real1,In_real2,In_real3,In_real4,In_real5,In_real6,In_rea
             stage1_ip_imag[5]<=Input_imag_reg[5];
             stage1_ip_imag[6]<=Input_imag_reg[6];
             stage1_ip_imag[7]<=Input_imag_reg[7];
-            strt_cnt<=1'b1;
+            strt_s1<=1'b1;
           end
+      else if(!start_fft)
+	      strt_s1<=1'b0;
                   
     end
 
@@ -574,9 +574,7 @@ module FFT(In_real0,In_real1,In_real2,In_real3,In_real4,In_real5,In_real6,In_rea
 
       	stage2_ip_imag[7]<=16'b0;
           
-        i <= 2'b0;
-        fft_ready <= 1'b0;
-        end
+       end
 
        else
 
@@ -613,16 +611,9 @@ module FFT(In_real0,In_real1,In_real2,In_real3,In_real4,In_real5,In_real6,In_rea
            stage2_ip_real[7]<=stage1_op_real[7];
 
            stage2_ip_imag[7]<=stage1_op_imag[7];
-           
-           if((i != 2'b11) & strt_cnt)
-             begin
-              i<=i+1'b1;
-			  fft_ready<=1'b0;	
-             end
-           
-           if(i == 2'b11)
-               fft_ready<=1'b1;
-         end
+                 
+           strt_s2<=strt_s1;
+        end
      
     end
 
@@ -707,9 +698,9 @@ module FFT(In_real0,In_real1,In_real2,In_real3,In_real4,In_real5,In_real6,In_rea
 
       	stage3_ip_real[2]<=16'b0;
 
-      	stage2_ip_imag[2]<=16'b0;
+      	stage3_ip_imag[2]<=16'b0;
 
-      	stage2_ip_real[3]<=16'b0;
+      	stage3_ip_real[3]<=16'b0;
 
       	stage3_ip_imag[3]<=16'b0;
 
@@ -767,8 +758,9 @@ module FFT(In_real0,In_real1,In_real2,In_real3,In_real4,In_real5,In_real6,In_rea
 
            stage3_ip_imag[7]<=stage2_op_imag[7];
 
-           
+           strt_s3<=strt_s2;
 
+	  
          end
 
     end
@@ -780,25 +772,25 @@ module FFT(In_real0,In_real1,In_real2,In_real3,In_real4,In_real5,In_real6,In_rea
 
 		//stage 3 output 1 X0
 
-  carry_look_ahead_16bit cla_fft_25 (.a(stage3_ip_real[0]),.b(stage3_ip_real[4]), .carry_in(1'b0), .sum(Out_real0),.cout()); // real (stage 2 op1 + stage 2 op5)
+  carry_look_ahead_16bit cla_fft_25 (.a(stage3_ip_real[0]),.b(stage3_ip_real[4]), .carry_in(1'b0), .sum(stage3_op_real[0]),.cout()); // real (stage 2 op1 + stage 2 op5)
 
-  carry_look_ahead_16bit cla_fft_26 (.a(stage3_ip_imag[0]),.b(stage3_ip_imag[4]), .carry_in(1'b0), .sum(Out_imag0),.cout()); // imag (stage 2 op1 + stage 2 op5)
+  carry_look_ahead_16bit cla_fft_26 (.a(stage3_ip_imag[0]),.b(stage3_ip_imag[4]), .carry_in(1'b0), .sum(stage3_op_imag[0]),.cout()); // imag (stage 2 op1 + stage 2 op5)
 
 	 
 
 	 	//stage 3 output 5 X4
 
-  carry_look_ahead_16bit cla_fft_27 (.a(stage3_ip_real[0]),.b(stage3_ip_real[4]), .carry_in(1'b1), .sum(Out_real4),.cout()); // real (stage 2 op1 + stage 2 op5)
+  carry_look_ahead_16bit cla_fft_27 (.a(stage3_ip_real[0]),.b(stage3_ip_real[4]), .carry_in(1'b1), .sum(stage3_op_real[4]),.cout()); // real (stage 2 op1 + stage 2 op5)
 
-  carry_look_ahead_16bit cla_fft_28 (.a(stage3_ip_imag[0]),.b(stage3_ip_imag[4]), .carry_in(1'b1), .sum(Out_imag4),.cout()); // imag (stage 2 op1 + stage 2 op5)
+  carry_look_ahead_16bit cla_fft_28 (.a(stage3_ip_imag[0]),.b(stage3_ip_imag[4]), .carry_in(1'b1), .sum(stage3_op_imag[4]),.cout()); // imag (stage 2 op1 + stage 2 op5)
 
 	 
 
 	  // stage 3 output 2 == X1 and output 6== X5
 
-  BFU bf3 (.A_real(stage3_ip_real[1]),.A_imag(stage3_ip_imag[1]),.B_real(stage3_ip_real[5]),.B_imag(stage3_ip_imag[5]),.sel_w(2'b01),.X0_real(Out_real1)
+  BFU bf3 (.A_real(stage3_ip_real[1]),.A_imag(stage3_ip_imag[1]),.B_real(stage3_ip_real[5]),.B_imag(stage3_ip_imag[5]),.sel_w(2'b01),.X0_real(stage3_op_real[1])
 
-           , .X0_imag(Out_imag1), .X1_real(Out_real5), .X1_imag(Out_imag5)); // 01 is selected for sel_w as w is the twiddle factor
+           , .X0_imag(stage3_op_imag[1]), .X1_real(stage3_op_real[5]), .X1_imag(stage3_op_imag[5])); // 01 is selected for sel_w as w is the twiddle factor
 
 	 
 
@@ -806,17 +798,102 @@ module FFT(In_real0,In_real1,In_real2,In_real3,In_real4,In_real5,In_real6,In_rea
 
 	
 
-  BFU bf4 (.A_real(stage3_ip_real[2]),.A_imag(stage3_ip_imag[2]),.B_real(stage3_ip_real[6]),.B_imag(stage3_ip_imag[6]),.sel_w(2'b10),.X0_real(Out_real2)
+  BFU bf4 (.A_real(stage3_ip_real[2]),.A_imag(stage3_ip_imag[2]),.B_real(stage3_ip_real[6]),.B_imag(stage3_ip_imag[6]),.sel_w(2'b10),.X0_real(stage3_op_real[2])
 
-           , .X0_imag(Out_imag2), .X1_real(Out_real6), .X1_imag(Out_imag6)); // 10 is selected for sel_w as w^2 is the twiddle factor
+           , .X0_imag(stage3_op_imag[2]), .X1_real(stage3_op_real[6]), .X1_imag(stage3_op_imag[6])); // 10 is selected for sel_w as w^2 is the twiddle factor
 
 	
 
 	//stage 3 output 4==X3 and OUTPUT 8 ==X7
 
-	  BFU bf5 (.A_real(stage3_ip_real[3]),.A_imag(stage3_ip_imag[3]),.B_real(stage3_ip_real[7]),.B_imag(stage3_ip_imag[7]),.sel_w(2'b11),.X0_real(Out_real3)
+	  BFU bf5 (.A_real(stage3_ip_real[3]),.A_imag(stage3_ip_imag[3]),.B_real(stage3_ip_real[7]),.B_imag(stage3_ip_imag[7]),.sel_w(2'b11),.X0_real(stage3_op_real[3])
 
-          , .X0_imag(Out_imag3), .X1_real(Out_real7), .X1_imag(Out_imag7)); // 11 is selected for sel_w as w^3 is the twiddle factor
+               , .X0_imag(stage3_op_imag[3]), .X1_real(stage3_op_real[7]), .X1_imag(stage3_op_imag[7])); // 11 is selected for sel_w as w^3 is the twiddle factor
+
+
+	    always@(posedge clk or negedge reset_n)
+
+    begin
+
+      if(!reset_n)
+
+        begin
+
+        Out_real0<=16'b0;
+
+        Out_imag0<=16'b0;
+
+        Out_real1<=16'b0;
+
+        Out_imag1<=16'b0;
+
+      	Out_real2<=16'b0;
+
+      	Out_imag2<=16'b0;
+
+      	Out_real3<=16'b0;
+
+      	Out_imag3<=16'b0;
+
+      	Out_real4<=16'b0;
+
+      	Out_imag4<=16'b0;
+
+      	Out_real5<=16'b0;
+
+      	Out_imag5<=16'b0;
+
+      	Out_real6<=16'b0;
+
+      	Out_imag6<=16'b0;
+
+      	Out_real7<=16'b0;
+
+        Out_imag7<=16'b0;
+
+        end
+
+       else
+
+         begin
+
+           Out_real0<=stage3_op_real[0];
+
+           Out_imag0<=stage3_op_imag[0];
+
+           Out_real1<=stage3_op_real[1];
+
+           Out_imag1<=stage3_op_imag[1];
+
+           Out_real2<=stage3_op_real[2];
+
+           Out_imag2<=stage3_op_imag[2];
+
+           Out_real3<=stage3_op_real[3];
+
+           Out_imag3<=stage3_op_imag[3];
+
+           Out_real4<=stage3_op_real[4];
+
+           Out_imag4<=stage3_op_imag[4];
+
+           Out_real5<=stage3_op_real[5];
+
+           Out_imag5<=stage3_op_imag[5];
+
+           Out_real6<=stage3_op_real[6];
+
+           Out_imag6<=stage3_op_imag[6];
+
+           Out_real7<=stage3_op_real[7];
+
+           Out_imag7<=stage3_op_imag[7];
+
+ 	   fft_ready<=strt_s3;
+
+         end
+
+    end
 
 endmodule
 
@@ -831,8 +908,7 @@ module FFT_wrapper(in0_real,in0_imag,in1_real,in1_imag,in2_real,in2_imag,in3_rea
 
   output wire signed [15:0]out0_real,out1_real,out2_real,out3_real,out4_real,out5_real,out6_real,out7_real,out0_imag,out1_imag,out2_imag,out3_imag,out4_imag,out5_imag,out6_imag,out7_imag;
 
-  
-FFT fft(.In_real0(in0_real),.In_real1(in1_real),.In_real2(in2_real),.In_real3(in3_real),.In_real4(in4_real),.In_real5(in5_real),.In_real6(in6_real),.In_real7(in7_real),.In_imag0(in0_imag),.In_imag1(in1_imag),.In_imag2(in2_imag),.In_imag3(in3_imag),.In_imag4(in4_imag),.In_imag5(in5_imag),.In_imag6(in6_imag),.In_imag7(in7_imag),.reset_n(RST_N),.clk(CLK),.write(write),.start_fft(start),.Out_real0(out0_real),.Out_real1(out1_real),.Out_real2(out2_real),.Out_real3(out3_real),.Out_real4(out4_real),.Out_real5(out5_real),.Out_real6(out6_real),.Out_real7(out7_real),.Out_imag0(out0_imag),.Out_imag1(out1_imag),.Out_imag2(out2_imag),.Out_imag3(out3_imag),.Out_imag4(out4_imag),.Out_imag5(out5_imag),.Out_imag6(out6_imag),.Out_imag7(out7_imag),.fft_ready(ready));
+  FFT fft(.In_real0(in0_real),.In_real1(in1_real),.In_real2(in2_real),.In_real3(in3_real),.In_real4(in4_real),.In_real5(in5_real),.In_real6(in6_real),.In_real7(in7_real),.In_imag0(in0_imag),.In_imag1(in1_imag),.In_imag2(in2_imag),.In_imag3(in3_imag),.In_imag4(in4_imag),.In_imag5(in5_imag),.In_imag6(in6_imag),.In_imag7(in7_imag),.reset_n(RST_N),.clk(CLK),.write(write),.start_fft(start),.Out_real0(out0_real),.Out_real1(out1_real),.Out_real2(out2_real),.Out_real3(out3_real),.Out_real4(out4_real),.Out_real5(out5_real),.Out_real6(out6_real),.Out_real7(out7_real),.Out_imag0(out0_imag),.Out_imag1(out1_imag),.Out_imag2(out2_imag),.Out_imag3(out3_imag),.Out_imag4(out4_imag),.Out_imag5(out5_imag),.Out_imag6(out6_imag),.Out_imag7(out7_imag),.fft_ready(ready));
 
 
 endmodule
