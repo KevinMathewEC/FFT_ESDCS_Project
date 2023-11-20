@@ -827,11 +827,12 @@ module FFT_wrapper(in0_real,in0_imag,in1_real,in1_imag,in2_real,in2_imag,in3_rea
 
   input CLK,RST_N,write,start;
 
-  output reg ready;
+  output ready;
 
   output wire signed [15:0]out0_real,out1_real,out2_real,out3_real,out4_real,out5_real,out6_real,out7_real,out0_imag,out1_imag,out2_imag,out3_imag,out4_imag,out5_imag,out6_imag,out7_imag;
 
-module FFT fft(.In_real0(in0_real),.In_real1(.in1_real),.In_real2(in2_real),.In_real3(in3_real),.In_real4(in4_real),.In_real5(in5_real),.In_real6(in6_real),.In_real7(in7_real),.In_imag0(in0_imag),.In_imag1(in1_imag),.In_imag2(in2_imag),.In_imag3(in3_imag),.In_imag4(in4_imag),.In_imag5(in5_imag),.In_imag6(in6_imag),.In_imag7(in7_imag),.reset_n(RST_N),.clk(CLK),.write(write),.start_fft(start),.Out_real0(out0_real),.Out_real1(out1_real),.Out_real2(out2_real),.Out_real3(out3_real),.Out_real4(out4_real),.Out_real5(out5_real),.Out_real6(out6_real),.Out_real7(out7_real),.Out_imag0(out0_imag),.Out_imag1(out1_imag),.Out_imag2(out2_imag),.Out_imag3(out3_imag),.Out_imag4(out4_imag),.Out_imag5(out5_imag),.Out_imag6(out6_imag),.Out_imag7(out7_imag),.fft_ready(ready));
+  
+FFT fft(.In_real0(in0_real),.In_real1(in1_real),.In_real2(in2_real),.In_real3(in3_real),.In_real4(in4_real),.In_real5(in5_real),.In_real6(in6_real),.In_real7(in7_real),.In_imag0(in0_imag),.In_imag1(in1_imag),.In_imag2(in2_imag),.In_imag3(in3_imag),.In_imag4(in4_imag),.In_imag5(in5_imag),.In_imag6(in6_imag),.In_imag7(in7_imag),.reset_n(RST_N),.clk(CLK),.write(write),.start_fft(start),.Out_real0(out0_real),.Out_real1(out1_real),.Out_real2(out2_real),.Out_real3(out3_real),.Out_real4(out4_real),.Out_real5(out5_real),.Out_real6(out6_real),.Out_real7(out7_real),.Out_imag0(out0_imag),.Out_imag1(out1_imag),.Out_imag2(out2_imag),.Out_imag3(out3_imag),.Out_imag4(out4_imag),.Out_imag5(out5_imag),.Out_imag6(out6_imag),.Out_imag7(out7_imag),.fft_ready(ready));
 
 
 endmodule
